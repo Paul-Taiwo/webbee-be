@@ -81,6 +81,40 @@ export class MenuItemsService {
     ]
   */
   async getMenuItems() {
-    throw new Error('TODO in task 3');
+    const menuItems = await this.prisma.menuItem.findMany();
+
+    const addToTree = (
+      node: { url: string | string[]; name: any },
+      treeNodes: any[],
+    ) => {
+      for (let i = 0; i < treeNodes.length; i++) {
+        const treeNode = treeNodes[i];
+
+        if (node.url.indexOf(treeNode.url + '/') === 0) {
+          addToTree(node, treeNode.children);
+
+          return;
+        }
+      }
+
+      treeNodes.push({
+        name: node.name,
+        url: node.url,
+        children: [],
+      });
+    };
+
+    const createTree = (nodes: string | any[]) => {
+      const tree: never[] = [];
+
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        addToTree(node, tree);
+      }
+
+      return tree;
+    };
+
+    return createTree(menuItems);
   }
 }
