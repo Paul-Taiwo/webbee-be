@@ -88,7 +88,21 @@ export class EventsService {
 
   @Get('events')
   async getEventsWithWorkshops() {
-    throw new Error('TODO task 1');
+    const events = await this.prisma.event.findMany();
+
+    const eventsWithWorkshops = await Promise.all(events.map(async (event) => {
+      const workshops = await this.prisma.workshop.findMany({
+        where: {
+          eventId: event.id,
+        },
+      });
+      return {
+        ...event,
+        workshops,
+      };
+    }));
+
+    return eventsWithWorkshops;
   }
 
   /* TODO: complete getFutureEventWithWorkshops so that it returns events with workshops, that have not yet started
